@@ -1,0 +1,4 @@
+glycine_test/PI_NVT/glycine_shieldings/pi_nvt_lmp_glycine_alpha_300K_00_w_cs.xyz filter=lfs diff=lfs merge=lfs -text
+glycine_test/PI_NVT/glycine_shieldings/pi_nvt_lmp_glycine_gamma_300K_00_w_cs.xyz filter=lfs diff=lfs merge=lfs -text
+glycine_test/PI_NVT/glycine_shieldings/pi_nvt_mlp_glycine_alpha_300K_00_w_cs.xyz filter=lfs diff=lfs merge=lfs -text
+glycine_test/PI_NVT/glycine_shieldings/pi_nvt_mlp_glycine_gamma_300K_00_w_cs.xyz filter=lfs diff=lfs merge=lfs -text
