@@ -1,0 +1,61 @@
+Geometry = GenFormat {
+    <<< init.gen # init file, order has to match
+}
+
+# Socket controlled DFTB+
+Driver = Socket {
+    File ="dftb_nvt" # match address input.xml
+    MaxSteps = -1 # keep running until i-PI terminates the run
+}
+
+# DFTB+ model specification
+Hamiltonian = DFTB {
+    Charge = +0
+    DampXH = Yes
+    DampXHExponent = 4.0
+    Dispersion = DftD3{
+        Damping = BeckeJohnson{}
+    }
+    Eigensolver = RelativelyRobust{}
+HubbardDerivs = {
+    H = -0.1857
+    C = -0.1492
+    N = -0.1535
+    O = -0.1575
+  }
+  MaxAngularMomentum = {
+    H = "s"
+    C = "p"
+    N = "p"
+    O = "p"
+  }
+    SCC = Yes
+    SCCTolerance = 1e-04
+    MaxSCCIterations = 1000
+    SlaterKosterFiles = Type2FileNames {
+        Prefix = /home/lumiaro/Documents/my_practices/edgars_data/edgars_data_modified/PIMD_examples/PI_NVT/glycine_gamma/MLP_run/delta_learning_scripts/dftb-param/dftb-param/
+        Separator = "-"
+        Suffix = ".skf"
+        LowerCaseTypeName = No
+    }
+    ThirdOrderFull = Yes
+    Filling = Fermi {
+        Temperature [K] = 300
+    }
+    KPointsAndWeights = { # how many
+        4 3 2 1.0
+    }
+}
+Analysis = {
+    CalculateForces = Yes
+    MullikenAnalysis = No
+}
+Options = {
+    WriteResultsTag = No
+    WriteDetailedOut = No
+    WriteBandOut = No
+}
+ParserOptions = {
+    ParserVersion = 4
+}
+
