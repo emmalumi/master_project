@@ -33,7 +33,7 @@ HubbardDerivs = {
     SCCTolerance = 1e-04
     MaxSCCIterations = 1000
     SlaterKosterFiles = Type2FileNames {
-        Prefix = /home/lumiaro/Documents/my_practices/edgars_data/edgars_data_modified/PIMD_examples/PI_NVT/glycine_gamma/MLP_run/delta_learning_scripts/dftb-param/dftb-param/
+        Prefix = /home/lumiaro/master_project/average_trajectories/glycines_test/dftb-param/dftb-param/
         Separator = "-"
         Suffix = ".skf"
         LowerCaseTypeName = No
@@ -43,7 +43,7 @@ HubbardDerivs = {
         Temperature [K] = 300
     }
     KPointsAndWeights = { # how many
-        4 3 2 1.0
+        5 2 4 1.0
     }
 }
 Analysis = {

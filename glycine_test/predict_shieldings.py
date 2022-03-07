@@ -8,9 +8,9 @@ from rascal.models import KRR
 species  = [1,6,7,8] # list of chemical species for which to compute shieldings
 compound = 'glycine' # compound, required for loading the correct ML shielding model
 nmodels  = 16 # all committees are composed of 16 individual models
-inname   = '/home/lumiaro/Documents/master_project/average_trajectories/glycine_test/PI_NVT/glycine_alpha/lmp_run/simulation.pos_0_ext.xyz' # filename/path of the input trajectory to calculate shieldings for
-outname  = '/home/lumiaro/Documents/master_project/average_trajectories/glycine_test/PI_NVT/glycine_shieldings/pi_nvt_lmp_glycine_alpha_300K_00_w_cs1.xyz' # filename/path of the file to which the trajactory with shieldings should be written
-outname_averaged  = '/home/lumiaro/Documents/master_project/average_trajectories/glycine_test/PI_NVT/glycine_shieldings/pi_nvt_lmp_glycine_alpha_300K_00_w_cs_averaged1.xyz'
+inname   = 'PI_NVT/glycine_gamma/MLP_run/aditis_mlp_results/simulation.pos_0_ext.xyz' # filename/path of the input trajectory to calculate shieldings for
+outname  = 'PI_NVT/glycine_shieldings/MLP_aditi/pi_nvt_MLP_glycine_gamma_300K_00_w_cs_aditi.xyz' # filename/path of the file to which the trajactory with shieldings should be written
+outname_averaged  = 'PI_NVT/glycine_shieldings/MLP_aditi/pi_nvt_MLP_glycine_gamma_300K_00_w_cs_aditi_averaged.xyz'
 nbatch   = 10000 # number of environments to be considered at a given time (to limit memory requirements)
 
 def predict(f_test, soap, kern, feat, weights, alpha):
@@ -26,7 +26,7 @@ def predict(f_test, soap, kern, feat, weights, alpha):
     y_final += alpha * (y_pred - np.mean(y_pred, axis=0))
     return y_final
 
-def ave_batch_soap(f_test, soap):
+def ave_batch_soap(f_test, soap, kern, feat):
 
     no_frames = len(f_test)
 
@@ -37,28 +37,31 @@ def ave_batch_soap(f_test, soap):
 
     no_atoms_non_masked = np.sum(f_test[0].get_array("center_atoms_mask"))
 
+   
+    # also predict averages
+    zeta = kern._kwargs["zeta"]
+    
+    X = feat.get_features()
 
     all_x_test_soaps = x_test_array.reshape(int(x_test_array.shape[0]/no_atoms_non_masked), no_atoms_non_masked , x_test_array.shape[1])
 
-    sum_soap = np.sum(all_x_test_soaps, 0)
+    sum_kernel = np.zeros((all_x_test_soaps[0].shape[0], X.shape[0] ))
+	
 
-    return sum_soap, no_frames
+    for  x_soap in all_x_test_soaps:
+        Y = x_soap
+        XY = X.dot(Y.T)
+        KNM = XY.T**zeta
+        sum_kernel += KNM
 
-def predict_averaged(kern, feat, weights, alpha, sum_soap, no_frames):
+    return sum_kernel, no_frames
 
-    soap_averaged = sum_soap/no_frames
+def predict_averaged(kern, feat, weights, alpha, sum_kernel, no_frames):
 
+    KNM = sum_kernel/no_frames
 
     model = KRR(weights, kern, feat, self_contributions=None, units = {'energy': 'ppm', 'length': 'AA'})
    
-    # also predict averages
-    zeta = model.kernel._kwargs["zeta"]
-    
-    X = model.X_train.get_features()
-    Y = soap_averaged
-    XY = X.dot(Y.T)
-
-    KNM = XY.T**zeta
 
     y_pred_averaged = np.dot(KNM, model.weights).reshape((-1)).reshape((-1, len(weights))).T
 
@@ -68,6 +71,7 @@ def predict_averaged(kern, feat, weights, alpha, sum_soap, no_frames):
     return y_final_averaged
     
 traj = read(inname, ':')
+print(len(traj))
 # prepare test frames
 bohr2ang = 0.529177
 
@@ -138,12 +142,14 @@ for sp in species:
     # predict for test frames
     for ib in range(int(np.sum(nsp)/nbatch + 0.5)):
         if first_batch:
-            sum_soap, no_frames = ave_batch_soap(traj[ ibatch[ib] : jbatch[ib] ], soap)
+            sum_soap, no_frames = ave_batch_soap(traj[ ibatch[ib] : jbatch[ib] ], soap, kern, feat)
             first_batch = False
         else:
-            sum_soap_tmp, no_frames_tmp = ave_batch_soap(traj[ ibatch[ib] : jbatch[ib] ], soap)
+            sum_soap_tmp, no_frames_tmp = ave_batch_soap(traj[ ibatch[ib] : jbatch[ib] ], soap, kern, feat)
             sum_soap += sum_soap_tmp
             no_frames += no_frames_tmp
+
+    
 
         pred = predict(traj[ ibatch[ib] : jbatch[ib] ], soap, kern, feat, weig, alpha)
 

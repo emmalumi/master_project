@@ -11,7 +11,7 @@
   <ffsocket mode="unix" name="driver-dftb" pbc="True"> <address>dftb_nvt</address> </ffsocket>
   <ffsocket mode="unix" name="driver-gap" pbc="True"> <address>gap_d_nvt</address> </ffsocket>
     <system>
-      <initialize nbeads="1">
+      <initialize nbeads="10">
       <file mode="xyz"> init.xyz </file>
       <velocities mode="thermal" units="kelvin"> 20 </velocities>
       </initialize>

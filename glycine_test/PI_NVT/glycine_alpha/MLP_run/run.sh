@@ -7,6 +7,6 @@ rm /tmp/ipi_dftb_nvt /tmp/ipi_gap_d_nvt
 i-pi input.xml > log.ipi & 
 sleep 30
 i-pi-py_driver -u -a gap_d_nvt -m rascal -o ../../CSD_GAP_model.json,init.extxyz > log.gap &
-dftb+ > log.dftb &
+/home/lumiaro/dftb+/bin/dftb+ > log.dftb &
 wait
 
